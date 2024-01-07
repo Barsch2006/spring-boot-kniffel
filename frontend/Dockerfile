@@ -13,7 +13,6 @@ RUN yarn build
 
 FROM nginx
 
-# the nginx root is /app
-COPY --from=builder /app /app
+COPY --from=builder /app/dist /usr/share/nginx/www/
 
 COPY nginx.conf /etc/nginx/nginx.conf
