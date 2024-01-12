@@ -11,7 +11,11 @@ const router = createRouter({
     {
       path: "/",
       component: () => import("../pages/Index.vue"),
-    }
+    },
+    {
+      path: "/game",
+      component: () => import("../pages/Game.vue"),
+    },
   ] as RouteRecordRaw[],
 });
 
