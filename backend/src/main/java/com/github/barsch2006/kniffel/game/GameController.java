@@ -51,4 +51,9 @@ public class GameController {
     public RollDiceResponse keep(@PathVariable String gameId, @PathVariable String playerName, @RequestBody RollDiceRequest reqBody) {
         return gameservice.keepDice(gameservice.byId(gameId).players.get(playerName), reqBody.getDice());
     }
+
+     @PostMapping("/{gameId}/{playerName}/book")
+    public BookResponse book(@PathVariable String gameId, @PathVariable String playerName, @RequestBody BookRequest reqBody) {
+        return gameservice.book(gameservice.byId(gameId).players.get(playerName), reqBody.getField());
+    }
 }

@@ -1,9 +1,12 @@
 package com.github.barsch2006.kniffel.game;
 
+import com.github.barsch2006.kniffel.game.httpdata.BookResponse;
 import com.github.barsch2006.kniffel.game.httpdata.GameInfoResponse;
 import com.github.barsch2006.kniffel.game.httpdata.GetGamesPlayersResponse;
 import com.github.barsch2006.kniffel.game.httpdata.RollDiceResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 
@@ -58,5 +61,23 @@ public class GameService {
             winners[i] = players[i].name;
         }
         return new GetGamesPlayersResponse(winners);
+    }
+
+    public BookResponse book(Player player, KniffelFields field) {
+        if (player.isFieldUsed(field)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Field already used");
+        }
+        // todo calc score for field
+        int score = 0;
+        player.setField(field, score);
+        // reset dice
+        player.getDice().forEach((key, value) -> {
+            value.setLocked(false);
+        });
+        return new BookResponse(
+                player.getScore(),
+                player.fieldsWithScoreToArray(),
+                player.fieldsUsedToArray()
+        );
     }
 }
