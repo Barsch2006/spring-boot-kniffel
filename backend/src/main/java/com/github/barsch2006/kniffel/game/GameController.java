@@ -1,68 +1,54 @@
 package com.github.barsch2006.kniffel.game;
 
-import com.github.barsch2006.kniffel.game.httpdata.CreateGameRequest;
-import com.github.barsch2006.kniffel.game.httpdata.GetGamesPlayersResponse;
+import com.github.barsch2006.kniffel.game.httpdata.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/game")
 @CrossOrigin
 public class GameController {
-
-    HashMap<String, Game> games = new HashMap<>();
+    @Autowired
+    private GameService gameservice;
 
     @PostMapping("/")
     public String createGame(
             @RequestBody CreateGameRequest createGameRequest) {
-        // create game ID
-        String gameId = _createGameID();
-        // create game
-        Game game = new Game(createGameRequest.getPlayerNames());
-        // add game to games
-        games.put(gameId, game);
-        // send the game ID back to the client
-        return gameId;
-    }
-
-    private String _createGameID() {
-        // 6 character long game ID
-        String gameId = "";
-        for (int i = 0; i < 6; i++) {
-            gameId += (char) (Math.random() * 26 + 65);
-        }
-        // check if game ID already exists
-        if (games.containsKey(gameId)) {
-            // if it does, try again
-            return _createGameID();
-        }
-        return gameId;
+        return gameservice.createGame(createGameRequest.getPlayerNames()).id;
     }
 
     @GetMapping("/{gameId}")
     public GetGamesPlayersResponse getGamesPlayerNames(@PathVariable String gameId) {
-        Game game = games.get(gameId);
+        Game game = gameservice.byId(gameId);
         if (game == null) {
-            // todo throw error (game not found)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid game ID");
         }
         String[] playerNames = game.players.keySet().toArray(new String[0]);
         return new GetGamesPlayersResponse(playerNames);
     }
 
     @GetMapping("/{gameId}/{playerName}")
-    public void getGameInfo(@PathVariable String gameId, @PathVariable String playerName) {
-        Game game = games.get(gameId);
+    public GameInfoResponse getGameInfo(@PathVariable String gameId, @PathVariable String playerName) {
+        Game game = gameservice.byId(gameId);
         if (game == null) {
-            // todo throw error (game not found)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid game ID");
         }
         if (!game.players.containsKey(playerName)) {
-            // todo throw error (player does not exists)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Player does not exist");
         }
-        if (game.players.get(playerName).getIsPlaying()) {
-            // todo throw error (player is already playing)
-            // no double sessions for one player allowed
-        }
-        game.players.get(playerName).setIsPlaying(true);
-        // todo: return game info
+        Player player = game.players.get(playerName);
+        return gameservice.getGameInfo(game, player);
+    }
+
+    @PostMapping("/{gameId}/{playerName}/roll")
+    public RollDiceResponse roll(@PathVariable String gameId, @PathVariable String playerName) {
+        return gameservice.rollDice(gameservice.byId(gameId).players.get(playerName));
+    }
+
+    @PostMapping("/{gameId}/{playerName}/keep")
+    public RollDiceResponse keep(@PathVariable String gameId, @PathVariable String playerName, @RequestBody RollDiceRequest reqBody) {
+        return gameservice.keepDice(gameservice.byId(gameId).players.get(playerName), reqBody.getDice());
     }
 }
