@@ -1,6 +1,19 @@
 <script lang="ts">
 export default {
-  data() {
+  data(): {
+    tab: "newgame" | "extistinggame" | "game_created";
+    playernames: Array<string>;
+    newPlayername: string;
+    joinplayernames: Array<string>;
+    joinGameCode: string;
+    joinPlayername: string;
+    gamecreatedID: string;
+    rules: {
+      required: (v: string) => boolean | string;
+      noPlayernameDoubled: (v: string) => boolean | string;
+      playernamelenght: (v: string) => boolean | string;
+    };
+  } {
     return {
       tab: "newgame" as "newgame" | "extistinggame" | "game_created",
       playernames: Array<string>(),
@@ -12,7 +25,8 @@ export default {
       rules: {
         required: (v: string) => !!v || "This field is required",
         noPlayernameDoubled: (v: string) => {
-          if (this.playernames.includes(v)) {
+          let playernames = this.playernames as unknown as Array<string>;
+          if (playernames.includes(v)) {
             return "Playername already exists";
           }
           return true;
@@ -33,16 +47,23 @@ export default {
     };
   },
   methods: {
-    addPlayername() {
+    addPlayername: (): void => {
+      // ? dont ask why `this` is undefined
+      // @ts-ignore
       if (this.newPlayername === "") return;
+      // @ts-ignore
       if (this.playernames.includes(this.newPlayername)) return;
+      // @ts-ignore
       if (this.newPlayername.length < 3) return;
+      // @ts-ignore
       if (this.newPlayername.length > 20) return;
+      // @ts-ignore
       this.playernames.push(this.newPlayername);
+      // @ts-ignore
       this.newPlayername = "";
     },
-    loadPlayernames() {},
-    joinGame() {},
+    loadPlayernames: (): void => {},
+    joinGame: (): void => {}
   },
 };
 </script>
@@ -95,7 +116,7 @@ export default {
         </VWindowItem>
 
         <VWindowItem value="game_created">
-          <VCardTitle>Game Created</VCardTitle>
+          <VCardTitle>Start Game</VCardTitle>
           <VCardSubtitle> Share the game code with you friends. </VCardSubtitle>
           <VCardItem>
             <VTextField
@@ -107,7 +128,7 @@ export default {
             />
           </VCardItem>
           <VCardActions>
-            <VBtn style="width: 100%" variant="tonal">Next</VBtn>
+            <VBtn style="width: 100%" variant="tonal">Start</VBtn>
           </VCardActions>
         </VWindowItem>
 

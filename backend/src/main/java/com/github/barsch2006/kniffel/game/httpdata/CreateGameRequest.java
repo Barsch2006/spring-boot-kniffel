@@ -1,4 +1,4 @@
-package com.github.barsch2006.kniffel.game;
+package com.github.barsch2006.kniffel.game.httpdata;
 
 import lombok.*;
 
