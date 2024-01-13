@@ -27,10 +27,10 @@ public class GameService {
     public GameInfoResponse getGameInfo(Game game, Player player) {
         return new GameInfoResponse(
                 game.players.keySet().toArray(new String[0]),
-                game.players.get(player).getScore(),
-                game.players.get(player).fieldsWithScoreToArray(),
-                game.players.get(player).fieldsUsedToArray(),
-                game.players.get(player).getDice().keySet().toArray(new Dice[0])
+                player.getScore(),
+                player.fieldsWithScoreToArray(),
+                player.fieldsUsedToArray(),
+                player.getDice().keySet().toArray(new Dice[0])
         );
     }
 
